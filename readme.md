@@ -6,6 +6,8 @@ ___
 ## Different Components
 Phong lighting consists of three components that are each added together.
 
+This phong is implemented into worldspace.
+
 Ambient Shading: Default lighting for when there is not a light source (no light)
 
 Diffuse Shading: An objects colour is affected by the position of the light (lighting)
