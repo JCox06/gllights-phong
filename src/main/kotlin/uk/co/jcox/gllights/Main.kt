@@ -44,7 +44,7 @@ fun main() {
 
     val geometry = GeometryBuilder2D.cube()
     var texture = loadTexture("data/textures/default.png")
-    var material = Material(Vector3f(1.0f, 0.5f, 0.5f), texture)
+    var material = Material(Vector3f(1.0f, 1.0f, 1.0f), texture)
     cubeObj = ObjRepresentative(geometry, material)
 
     texture = loadTexture("data/textures/lightsource.png")
@@ -94,7 +94,7 @@ private fun render() {
     mainProgram.send("cameraPos", camera.position)
     mainProgram.send("projMatrix", proj)
     mainProgram.send("camMatrix", camera.lookAt)
-    mainProgram.send("lightColour", Vector3f(1.0f, 0.5f, 1.0f))
+    mainProgram.send("lightColour", Vector3f(1.0f, 1.0f, 1.0f))
     mainProgram.send("lightPos", lightPos)
 
     cubePos.forEach {
@@ -139,7 +139,7 @@ private fun input(deltaTime: Float) {
 
 private fun update(deltaTime: Float) {
 
-    val radius = 2;
+    val radius = 1.5f;
     val speed = 1;
 
     lightPos.x = radius * Math.sin(window.timeElapsed * speed).toFloat()

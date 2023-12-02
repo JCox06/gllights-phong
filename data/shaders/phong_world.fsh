@@ -25,7 +25,7 @@ void main() {
     vec3 normalVec = normalize(fNormal);
     vec3 fragToLight = normalize(lightPos - fWorldPos); //Frag to Light
 
-    vec3 ambientComponent = calcAmbient(lightColour, 0.1f);
+    vec3 ambientComponent = calcAmbient(lightColour, 0.2f);
     vec3 diffuseComponent = calcDiffuse(lightColour, fragToLight, normalVec);
     vec3 specularComponent = calcSpecular(lightColour, fragToLight, normalVec);
 
