@@ -30,8 +30,15 @@ class Renderer {
         GL30.glBindVertexArray(objRep.geometry)
         GL15.glActiveTexture(GL15.GL_TEXTURE0)
         GL15.glBindTexture(GL15.GL_TEXTURE_2D, objRep.material.textureId)
-        program.send("main2D", 0)
-        program.send("objectColour", objRep.material.diffuseColour)
+
+        program.send("material.objectColour", objRep.material.objectColour)
+        program.send("material.ambient", objRep.material.ambientEffector)
+        program.send("material.diffuse", objRep.material.diffuseEffector)
+        program.send("material.specular", objRep.material.specularEffector)
+        program.send("material.shininess", objRep.material.shininess)
+        program.send("material.main2D", 0)
+
+
         GL11.glDrawArrays(GL11.GL_TRIANGLES, 0, 36)
     }
 }

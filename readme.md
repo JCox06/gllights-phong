@@ -19,3 +19,5 @@ Specular Shading: The objects colour is affected by the position of the camera (
 Thanks learnopengl and lighthouse3d for information on this lighting model
 
 Texture https://pixabay.com/photos/vintage-wood-texture-wooden-wall-1557993/
+https://pixabay.com/photos/background-texture-grunge-metal-1180666/
+https://pixabay.com/illustrations/silver-background-texture-2143730/

@@ -33,7 +33,7 @@ class ShaderProgram (
         GL20.glLinkProgram(program)
 
         if (getProgramInfoLog().isNotEmpty()) {
-            throw RuntimeException("Shader Compilation failed: " + getProgramInfoLog());
+            throw RuntimeException("Shader Compilation failed for $name : " + getProgramInfoLog());
         }
 
         bind()
@@ -56,7 +56,7 @@ class ShaderProgram (
     private fun getLoc(uniformName: String): Int {
         val location: Int = GL20.glGetUniformLocation(program, uniformName)
         if (location == -1) {
-            throw RuntimeException("Did not expect uniform $uniformName in program $name");
+//            throw RuntimeException("Did not expect uniform $uniformName in program $name");
         }
         return location;
     }
@@ -76,6 +76,11 @@ class ShaderProgram (
     fun send(uniformName: String, value: Int) {
         val loc: Int = getLoc(uniformName)
         GL20.glUniform1i(loc, value)
+    }
+
+    fun send(uniformName: String, value: Float) {
+        val loc = getLoc(uniformName)
+        GL20.glUniform1f(loc, value)
     }
 
     fun terminate() {
