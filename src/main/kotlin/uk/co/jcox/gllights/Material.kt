@@ -3,10 +3,8 @@ package uk.co.jcox.gllights
 import org.joml.Vector3f
 
 data class Material(
-    val objectColour: Vector3f,
-    val ambientEffector: Vector3f,
-    val diffuseEffector: Vector3f,
-    val specularEffector: Vector3f,
+    val diffuseTexture: Int,
+    val specularTexture: Int,
+    val emissionTexture: Int,
     val shininess: Float,
-    val textureId: Int,
 )

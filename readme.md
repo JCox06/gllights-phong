@@ -1,7 +1,7 @@
 # Phong Lighting
 ___
 
-<img src="screen.png">
+<img src="data/textures/latest.png">
 
 ## Different Components
 Phong lighting consists of three components that are each added together.
