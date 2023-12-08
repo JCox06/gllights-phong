@@ -8,11 +8,6 @@ in vec2 fTexelCoord;
 in vec3 fNormal;
 in vec3 fWorldPos;
 
-uniform vec3 cameraPos;
-uniform vec3 lightDiffuse;
-uniform vec3 lightAmbient;
-uniform vec3 lightPos;
-
 struct Material {
     sampler2D diffuse;
     sampler2D specular;
@@ -20,44 +15,98 @@ struct Material {
     float shininess;
 };
 
+
+struct LightShading {
+    vec3 ambience;
+    vec3 diffuse;
+    vec3 specular;
+};
+
+
+struct DirectionalLight {
+    LightShading lightShading;
+    vec3 direction;
+};
+
+struct PointLight {
+    LightShading lightShading;
+    vec3 worldPosition;
+    float constant;
+    float linear;
+    float quadratic;
+};
+
+
+vec3 calcDirectionalLighting(vec3 normal);
+vec3 calcPointsLighting(PointLight light, vec3 normal);
+vec3 calcAmbient(vec3 ambience);
+vec3 calcDiffuse(vec3 diffuse, vec3 normal, vec3 lightDir);
+vec3 calcSpecular(vec3 specular, vec3 normal, vec3 lightDir);
+
+
+#define LIGHTS 1
+
+uniform vec3 cameraPos;
 uniform Material material;
-
-
-vec3 calcAmbient(vec3 lightColour);
-vec3 calcDiffuse(vec3 lightColour, vec3 lightDir, vec3 normal);
-vec3 calcSpecular(vec3 lightColour, vec3 lightDir, vec3 normal);
-
+uniform DirectionalLight directionalLight;
+uniform PointLight pointLights[LIGHTS];
 
 void main() {
     vec3 normalVec = normalize(fNormal);
-    vec3 fragToLight = normalize(lightPos - fWorldPos); //Frag to Light
+    vec3 shading = calcDirectionalLighting(normalVec);
 
-    vec3 ambientComponent = calcAmbient(lightAmbient);
-    vec3 diffuseComponent = calcDiffuse(lightDiffuse, fragToLight, normalVec);
-    vec3 specularComponent = calcSpecular(lightDiffuse, fragToLight, normalVec);
+    for (int i = 0; i < pointLights.length(); i++) {
+        PointLight light = pointLights[i];
+        shading += calcPointsLighting(light, normalVec);
+    }
 
-    FragColour = vec4(ambientComponent + diffuseComponent + specularComponent, 1.0f) + texture(material.emission, fTexelCoord);
+    FragColour = vec4(shading, 1.0f) + texture(material.emission, fTexelCoord);
 }
 
 
-vec3 calcAmbient(vec3 lightColour) {
-    return lightColour * vec3(texture(material.diffuse, fTexelCoord));
+
+vec3 calcDirectionalLighting(vec3 normal) {
+    //Calculate Ambient Shading:
+    vec3 ambient = calcAmbient(directionalLight.lightShading.ambience);
+
+    //Calculate Diffuse Shading:
+    vec3 diffuse = calcDiffuse(directionalLight.lightShading.diffuse, normal, directionalLight.direction);
+
+    //Calculate Specular Shading:
+    vec3 specular = calcSpecular(directionalLight.lightShading.specular, normal, directionalLight.direction);
+
+    return (ambient + diffuse + specular);
 }
 
 
-vec3 calcDiffuse(vec3 lightColour, vec3 lightDir, vec3 normal) {
-    //Calculate how close the light direction is to the normal
-    float scaleFactor = max(dot(normal, lightDir), 0.0f);
-    vec3 diffuseShading = scaleFactor * lightColour * vec3(texture(material.diffuse, fTexelCoord));
-    return diffuseShading;
+vec3 calcPointsLighting(PointLight light, vec3 normal) {
+
+    vec3 fragToLight = normalize(light.worldPosition - fWorldPos);
+    float fragLightLength = length(light.worldPosition - fWorldPos);
+    float Fatt = 1.0f / (light.constant + light.linear * fragLightLength + light.quadratic * pow(fragLightLength, 2));
+
+    vec3 ambient = calcAmbient(light.lightShading.ambience);
+    vec3 diffuse = calcDiffuse(light.lightShading.diffuse, normal, fragToLight);
+    vec3 specular = calcSpecular(light.lightShading.specular, normal, fragToLight);
+
+    return (ambient + diffuse + specular) *Fatt;
 }
 
 
-vec3 calcSpecular(vec3 lightColour, vec3 lightDir,vec3 normal) {
+vec3 calcAmbient(vec3 ambience) {
+    return ambience * vec3(texture(material.diffuse, fTexelCoord));
+}
+
+
+vec3 calcDiffuse(vec3 diffuse, vec3 normal, vec3 lightDir) {
+    float diffuseSF = max(dot(normal, lightDir), 0.0f);
+    return diffuseSF * diffuse * vec3(texture(material.diffuse, fTexelCoord));
+}
+
+
+vec3 calcSpecular(vec3 specular, vec3 normal, vec3 lightDir) {
     vec3 fragToCam = normalize(cameraPos - fWorldPos);
-    vec3 reflectDir = reflect(-lightDir, normal); //Calculate relflection ray from indicent ray
-    float specScaleFactor = pow(max(dot(fragToCam, reflectDir), 0.0f), material.shininess);
-    vec3 specularShading = lightColour * specScaleFactor * vec3(texture(material.specular, fTexelCoord));
-    return specularShading;
+    vec3 reflectedRay = reflect(-lightDir, normal);
+    float specSF = pow(max(dot(fragToCam, reflectedRay), 0.0f), material.shininess);
+    return specular * specSF * vec3(texture(material.specular, fTexelCoord));
 }
-

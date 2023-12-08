@@ -25,6 +25,45 @@ private var lightObj: ObjRepresentative? = null
 
 private val lightPos: Vector3f = Vector3f(-5.0f, 2.0f, 5.0f)
 
+private val cubePositions = listOf(
+    Vector3f(0.0f, 0.0f, 0.0f),
+    Vector3f(2.0f, 2.0f, 2.0f),
+    Vector3f(-2.0f, -2.0f, -2.0f),
+    Vector3f(1.0f, 3.0f, -2.0f),
+    Vector3f(-1.0f, 0.0f, 2.0f),
+    Vector3f(0.0f, 0.0f, 4.0f),
+    Vector3f(0.0f, 0.0f, -4.0f),
+    Vector3f(2.0f, 3.0f, 8.0f),
+    Vector3f(0.0f, -3.0f, -3.0f),
+    Vector3f(-3.0f, 1.0f, -4.0f),
+    Vector3f(15.0f, 0.0f, 0.0f),
+    Vector3f(2.0f, 6.0f, 2.0f),
+    Vector3f(-2.0f, -2.0f, -2.0f),
+    Vector3f(24.0f, 4.0f, -2.0f),
+    Vector3f(-1.0f, 0.0f, -15.0f),
+    Vector3f(0.0f, 0.0f, 13.0f),
+    Vector3f(14.0f, 0.0f, -4.0f),
+    Vector3f(-12.0f, 3.0f, 8.0f),
+    Vector3f(6.0f, -3.0f, -3.0f),
+    Vector3f(2.0f, 1.0f, -12.0f),
+    Vector3f(-25.0f, -2.0f, -2.0f),
+    Vector3f(24.0f, 4.0f, -25.0f),
+    Vector3f(-12.0f, 0.0f, 25.0f),
+    Vector3f(30.0f, 2.0f, 13.0f),
+    Vector3f(-35.0f, -1.0f, -4.0f),
+    Vector3f(40.0f, 3.0f, 8.0f),
+    Vector3f(6.0f, -3.0f, -45.0f),
+    Vector3f(2.0f, 1.0f, -50.0f),
+    Vector3f(0.0f, 0.0f, -10.0f),
+    Vector3f(0.0f, 0.0f, -20.0f),
+    Vector3f(0.0f, 0.0f, -30.0f),
+    Vector3f(0.0f, 0.0f, -40.0f),
+    Vector3f(0.0f, 0.0f, -50.0f),
+    Vector3f(0.0f, 0.0f, -60.0f),
+    Vector3f(0.0f, 0.0f, -70.0f),
+    Vector3f(0.0f, 0.0f, -80.0f),
+)
+
 fun main() {
     window.createGlContext()
     renderer.setup()
@@ -36,12 +75,12 @@ fun main() {
 
     val geometry = GeometryBuilder2D.cube()
     var diffuseTexture = loadTexture("data/textures/container_diffuse.png")
-    val specularTexture = loadTexture("data/textures/container_secret_specular.png")
+    val specularTexture = loadTexture("data/textures/container_specular.png")
     var material = Material(
         diffuseTexture = diffuseTexture,
         specularTexture = specularTexture,
         emissionTexture = 0,
-        shininess = 32f,
+        shininess = 64f,
     )
     cubeObj = ObjRepresentative(geometry, material)
 
@@ -99,18 +138,34 @@ private fun render() {
     mainProgram.send("cameraPos", camera.position)
     mainProgram.send("projMatrix", proj)
     mainProgram.send("camMatrix", camera.lookAt)
-    mainProgram.send("lightDiffuse", Vector3f(1.0f, 1.0f, 1.0f))
-    mainProgram.send("lightAmbient", Vector3f(0.2f, 0.2f, 0.2f))
 
-    mainProgram.send("lightPos", lightPos)
+    mainProgram.send("directionalLight.lightShading.ambience", Vector3f(0.005f, 0.005f, 0.005f));
+    mainProgram.send("directionalLight.lightShading.diffuse", Vector3f(0.5f, 0.5f, 0.5f));
+    mainProgram.send("directionalLight.lightShading.specular", Vector3f(1.0f, 1.0f, 1.0f));
+    mainProgram.send("directionalLight.direction", Vector3f(0.0f, 1.0f, 0.0f))
 
-    mainProgram.send("modelMatrix", Matrix4f())
-    renderer.draw(cubeObj!!, mainProgram)
+    mainProgram.send("pointLights[0].lightShading.ambience", Vector3f(0.1f, 0.1f, 0.1f))
+    mainProgram.send("pointLights[0].lightShading.diffuse", Vector3f(1.0f, 1.0f, 1.0f))
+    mainProgram.send("pointLights[0].lightShading.specular", Vector3f(1.0f, 1.0f, 1.0f))
 
-    mainProgram.send("modelMatrix", Matrix4f().translate(lightPos).scale(0.2f))
+    mainProgram.send("pointLights[0].constant", 1.0f)
+    mainProgram.send("pointLights[0].linear", 1.0f)
+    mainProgram.send("pointLights[0].constant", 2.0f)
+    mainProgram.send("pointLights[0].worldPosition", lightPos)
+
+
+
+    cubePositions.forEach {
+        mainProgram.send("modelMatrix", Matrix4f().translate(it))
+        renderer.draw(cubeObj!!, mainProgram)
+    }
+
+    mainProgram.send("modelMatrix", Matrix4f().translate(lightPos).scale(0.25f))
     renderer.draw(lightObj!!, mainProgram)
 }
 
+
+//todo Something very wrong with specular lighting component
 
 private fun input(deltaTime: Float) {
 
