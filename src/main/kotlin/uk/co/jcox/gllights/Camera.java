@@ -52,4 +52,8 @@ public class Camera {
     public Vector3f getPosition() {
         return position;
     }
+
+    public Vector3f getFacing() {
+        return facing;
+    }
 }

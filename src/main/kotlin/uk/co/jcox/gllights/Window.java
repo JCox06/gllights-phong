@@ -45,7 +45,6 @@ public class Window {
 
         GLFW.glfwSetFramebufferSizeCallback(this.handle, (win, w, h) -> resized(w, h));
         GLFW.glfwSetCursorPosCallback(this.handle, (win, xPos, yPos) -> setMouseFunc(xPos, yPos));
-        GLFW.glfwSwapInterval(0);
 
         GLFW.glfwMakeContextCurrent(this.handle);
 

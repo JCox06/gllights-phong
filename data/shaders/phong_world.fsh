@@ -34,6 +34,11 @@ struct PointLight {
     float constant;
     float linear;
     float quadratic;
+    float angleCutoff;
+    float angleOuterCutoff;
+    vec3 direction;
+    bool spotLight;
+    bool on;
 };
 
 
@@ -44,7 +49,7 @@ vec3 calcDiffuse(vec3 diffuse, vec3 normal, vec3 lightDir);
 vec3 calcSpecular(vec3 specular, vec3 normal, vec3 lightDir);
 
 
-#define LIGHTS 1
+#define LIGHTS 2
 
 uniform vec3 cameraPos;
 uniform Material material;
@@ -57,7 +62,9 @@ void main() {
 
     for (int i = 0; i < pointLights.length(); i++) {
         PointLight light = pointLights[i];
-        shading += calcPointsLighting(light, normalVec);
+        if (light.lightShading.ambience != 0 && light.on) {
+            shading += calcPointsLighting(light, normalVec);
+        }
     }
 
     FragColour = vec4(shading, 1.0f) + texture(material.emission, fTexelCoord);
@@ -82,12 +89,25 @@ vec3 calcDirectionalLighting(vec3 normal) {
 vec3 calcPointsLighting(PointLight light, vec3 normal) {
 
     vec3 fragToLight = normalize(light.worldPosition - fWorldPos);
+
+    float angleTest = dot(fragToLight, normalize(-light.direction));
+    float angleDiff = light.angleCutoff - light.angleOuterCutoff;
+    float intensity = clamp((angleTest - light.angleOuterCutoff) / angleDiff, 0.0f, 1.0f);
+
+    if (light.spotLight && angleTest <= light.angleOuterCutoff) {
+        return vec3(0.0f, 0.0f, 0.0f);
+    }
+
     float fragLightLength = length(light.worldPosition - fWorldPos);
     float Fatt = 1.0f / (light.constant + light.linear * fragLightLength + light.quadratic * pow(fragLightLength, 2));
 
     vec3 ambient = calcAmbient(light.lightShading.ambience);
     vec3 diffuse = calcDiffuse(light.lightShading.diffuse, normal, fragToLight);
     vec3 specular = calcSpecular(light.lightShading.specular, normal, fragToLight);
+
+    if (light.direction != 0) {
+        Fatt*= intensity;
+    }
 
     return (ambient + diffuse + specular) *Fatt;
 }

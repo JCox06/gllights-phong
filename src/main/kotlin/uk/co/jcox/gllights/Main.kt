@@ -150,10 +150,31 @@ private fun render() {
 
     mainProgram.send("pointLights[0].constant", 1.0f)
     mainProgram.send("pointLights[0].linear", 1.0f)
-    mainProgram.send("pointLights[0].constant", 2.0f)
+    mainProgram.send("pointLights[0].quadratic", 2.0f)
     mainProgram.send("pointLights[0].worldPosition", lightPos)
+    mainProgram.send("pointLights[0].direction", Vector3f(0.0f, 0.0f, 0.0f))
+    mainProgram.send("pointLights[0].spotLight", 0)
+    mainProgram.send("pointLights[0].on", 1)
 
 
+
+    mainProgram.send("pointLights[1].lightShading.ambience", Vector3f(0.1f, 0.1f, 0.1f))
+    mainProgram.send("pointLights[1].lightShading.diffuse", Vector3f(1.0f, 0.0f, 0.0f))
+    mainProgram.send("pointLights[1].lightShading.specular", Vector3f(1.0f, 1.0f, 1.0f))
+
+    mainProgram.send("pointLights[1].constant", 1.0f)
+    mainProgram.send("pointLights[1].linear", 0.22f)
+    mainProgram.send("pointLights[1].quadratic", 0.20f)
+    mainProgram.send("pointLights[1].worldPosition", camera.position)
+    mainProgram.send("pointLights[1].angleCutoff", Math.cos(Math.toRadians(15.0f)))
+    mainProgram.send("pointLights[1].angleOuterCutoff", Math.cos(Math.toRadians(20.0f)))
+    mainProgram.send("pointLights[0].spotLight", 1)
+    mainProgram.send("pointLights[1].direction", camera.facing)
+    if (window.isPressed(GLFW.GLFW_KEY_F)) {
+        mainProgram.send("pointLights[1].on", 1)
+    } else {
+        mainProgram.send("pointLights[1].on", 0)
+    }
 
     cubePositions.forEach {
         mainProgram.send("modelMatrix", Matrix4f().translate(it))
@@ -164,8 +185,6 @@ private fun render() {
     renderer.draw(lightObj!!, mainProgram)
 }
 
-
-//todo Something very wrong with specular lighting component
 
 private fun input(deltaTime: Float) {
 

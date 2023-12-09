@@ -56,7 +56,7 @@ class ShaderProgram (
     private fun getLoc(uniformName: String): Int {
         val location: Int = GL20.glGetUniformLocation(program, uniformName)
         if (location == -1) {
-//            throw RuntimeException("Did not expect uniform $uniformName in program $name");
+            throw RuntimeException("Did not expect uniform $uniformName in program $name");
         }
         return location;
     }
